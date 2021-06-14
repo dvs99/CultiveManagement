@@ -11,8 +11,7 @@ class ParcelableDialogInfo(val title: String, val text: String, var image: Bitma
         parcel.readString()!!,
         parcel.readParcelable(Bitmap::class.java.classLoader)!!,
         Date(parcel.readLong())
-    ) {
-    }
+    )
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeString(title)

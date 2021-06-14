@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity(), MainView {
         loadingProgressBar = findViewById(R.id.loadingProgressBar)
 
         val model =
-            if (savedInstanceState != null) savedInstanceState.getParcelable<MainModel>(MODEL)!!
+            if (savedInstanceState != null) savedInstanceState.getParcelable(MODEL)!!
             else MainModel()
         presenter = MainPresenter(this, model, this)
 
@@ -72,6 +72,17 @@ class MainActivity : AppCompatActivity(), MainView {
         button.isEnabled = false
     }
 
+    override fun startLoading() {
+        sectorsTextView.visibility = View.INVISIBLE
+        subsectorsTextView.visibility = View.INVISIBLE
+        sectorsEditText.visibility = View.INVISIBLE
+        subsectorsEditText.visibility = View.INVISIBLE
+        button.visibility = View.INVISIBLE
+
+        loadingTextView.visibility = View.VISIBLE
+        loadingProgressBar.visibility = View.VISIBLE
+    }
+
     override fun endLoading(sectors: String, subsectors: String) {
         sectorsEditText.setText(sectors)
         subsectorsEditText.setText(subsectors)
@@ -84,17 +95,6 @@ class MainActivity : AppCompatActivity(), MainView {
 
         loadingTextView.visibility = View.INVISIBLE
         loadingProgressBar.visibility = View.INVISIBLE
-    }
-
-    override fun startLoading() {
-        sectorsTextView.visibility = View.INVISIBLE
-        subsectorsTextView.visibility = View.INVISIBLE
-        sectorsEditText.visibility = View.INVISIBLE
-        subsectorsEditText.visibility = View.INVISIBLE
-        button.visibility = View.INVISIBLE
-
-        loadingTextView.visibility = View.VISIBLE
-        loadingProgressBar.visibility = View.VISIBLE
     }
 
     override fun launchSectorSelectionActivity(){

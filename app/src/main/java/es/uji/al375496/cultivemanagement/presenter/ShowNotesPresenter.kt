@@ -58,6 +58,7 @@ class ShowNotesPresenter (private val view: ShowNotesView, val model: ShowNotesM
         view.showPending = model.showPending
     }
 
+    //renames current sector or subsector
     fun rename(string: String) {
         view.loading = true
         model.rename(string, context) {

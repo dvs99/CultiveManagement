@@ -13,8 +13,7 @@ interface ShowNotesView {
     fun onRename(view : View)
     fun onAdd(view : View)
     fun onSwitchRecyclerView(view : View)
+
     fun populateRecycleViews(pendingNotes: List<Note>, completeNotes: List<Note>)
     fun setTitle(string: String)
-
-    fun restoreDialog(info: ParcelableDialogInfo)
 }

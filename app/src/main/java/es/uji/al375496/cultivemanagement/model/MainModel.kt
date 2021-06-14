@@ -14,7 +14,7 @@ class MainModel(): Parcelable
 {
     var numberOfSectors: Int = 0
     var numberOfSubsectors: Int = 0
-    var performedInitTest: Boolean = false
+    private var performedInitTest: Boolean = false
 
     constructor(parcel: Parcel) : this() {
         numberOfSectors = parcel.readInt()
@@ -67,7 +67,7 @@ class MainModel(): Parcelable
     override fun writeToParcel(parcel: Parcel, flags: Int) {
         parcel.writeInt(numberOfSectors)
         parcel.writeInt(numberOfSubsectors)
-        parcel.writeInt(if(performedInitTest) 1 else 0);
+        parcel.writeInt(if(performedInitTest) 1 else 0)
     }
 
     override fun describeContents(): Int {

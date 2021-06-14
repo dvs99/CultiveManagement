@@ -1,6 +1,5 @@
 package es.uji.al375496.cultivemanagement
 
-import android.Manifest
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -8,14 +7,13 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.*
-import androidx.core.app.ActivityCompat
 import es.uji.al375496.cultivemanagement.model.SectorSelectionModel
 import es.uji.al375496.cultivemanagement.model.database.entities.Sector
 import es.uji.al375496.cultivemanagement.model.database.entities.Subsector
 import es.uji.al375496.cultivemanagement.presenter.SectorSelectionPresenter
 import es.uji.al375496.cultivemanagement.view.SectorSelectionView
 
-class SectorSelectionActivity() : AppCompatActivity(), SectorSelectionView
+class SectorSelectionActivity : AppCompatActivity(), SectorSelectionView
 {
     override var fixSectorName: Boolean = false
     override var fixSubsectorName: Boolean = false
@@ -34,7 +32,9 @@ class SectorSelectionActivity() : AppCompatActivity(), SectorSelectionView
     private lateinit var loadingTextView: TextView
     private lateinit var loadingProgressBar: ProgressBar
 
+    private var shouldShowSubsector = false
     private var recoveredSectorString: String? = null
+
     private var recoveredSubsectorString: String? = null
 
     private lateinit var presenter: SectorSelectionPresenter
@@ -54,7 +54,7 @@ class SectorSelectionActivity() : AppCompatActivity(), SectorSelectionView
         loadingTextView = findViewById(R.id.loadingTextView)
         loadingProgressBar = findViewById(R.id.loadingProgressBar)
 
-        lateinit var model: SectorSelectionModel;
+        lateinit var model: SectorSelectionModel
         if (savedInstanceState != null){
             model = savedInstanceState.getParcelable(MODEL)!!
             recoveredSectorString = savedInstanceState.getString(SECTOR)
@@ -65,18 +65,6 @@ class SectorSelectionActivity() : AppCompatActivity(), SectorSelectionView
 
         presenter = SectorSelectionPresenter(this, model, this)
     }
-
-    override fun onResume() {
-        super.onResume()
-
-        presenter.setup(recoveredSectorString, recoveredSubsectorString)
-
-        recoveredSectorString = null
-        recoveredSubsectorString = null
-    }
-
-
-
 
     override var enabledSectorButton: Boolean
         get() = sectorButton.isEnabled
@@ -100,7 +88,6 @@ class SectorSelectionActivity() : AppCompatActivity(), SectorSelectionView
                 subsectorTextView.visibility = View.GONE
             }
         }
-    private var shouldShowSubsector = false
 
     override var loading: Boolean
         get() = loadingProgressBar.visibility == View.VISIBLE
@@ -137,6 +124,15 @@ class SectorSelectionActivity() : AppCompatActivity(), SectorSelectionView
             R.id.sectorGoButton -> presenter.onSectorButton()
             R.id.subsectorGoButton -> presenter.onSubsectorButton()
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        presenter.setup(recoveredSectorString, recoveredSubsectorString)
+
+        recoveredSectorString = null
+        recoveredSubsectorString = null
     }
 
     override fun populateSectors(sectors: List<Sector>) {
@@ -234,8 +230,7 @@ class SectorSelectionActivity() : AppCompatActivity(), SectorSelectionView
         subsectorAutoCompleteTextView.setText(s)
     }
 
-    override fun onSaveInstanceState(outState: Bundle)
-    {
+    override fun onSaveInstanceState(outState: Bundle) {
         outState.putParcelable(MODEL, presenter.model)
         outState.putString(SECTOR, sectorAutoCompleteTextView.text.toString())
         outState.putString(SUBSECTOR, subsectorAutoCompleteTextView.text.toString())

@@ -1,7 +1,6 @@
 package es.uji.al375496.cultivemanagement.presenter
 
 import android.content.Context
-import android.widget.EditText
 import es.uji.al375496.cultivemanagement.model.SectorSelectionModel
 import es.uji.al375496.cultivemanagement.model.database.entities.Sector
 import es.uji.al375496.cultivemanagement.model.database.entities.Subsector
@@ -11,7 +10,7 @@ import kotlinx.coroutines.*
 class SectorSelectionPresenter (private val view: SectorSelectionView, val model: SectorSelectionModel, private val context: Context)
 {
     fun setup(sectorText: String?, subsectorText: String?) {
-        //add the list to the sector autocomplete view
+        //add the list to the sector autocomplete view and fill up any fields if they are setup
         view.loading = true
 
         val modelSectorText = model.selectedSector
@@ -33,7 +32,7 @@ class SectorSelectionPresenter (private val view: SectorSelectionView, val model
                         withContext(Dispatchers.Default) {
                             var done = false
                             while (!done)
-                                done = view.visibleSubsector;
+                                done = view.visibleSubsector
                         }
                     }
                     value.await()
@@ -77,26 +76,22 @@ class SectorSelectionPresenter (private val view: SectorSelectionView, val model
         view.enabledSubsectorButton = true
     }
 
-    fun onSubsectorDeselected()
-    {
+    fun onSubsectorDeselected() {
         model.selectedSubsector = null
         view.enabledSubsectorButton = false
     }
 
-    fun onAllButton()
-    {
+    fun onAllButton() {
         view.launchShowNotesActivity(null, null)
     }
 
-    fun onSectorButton()
-    {
+    fun onSectorButton() {
         if (model.selectedSector != null) {
             view.launchShowNotesActivity(model.selectedSector, null)
         }
     }
 
-    fun onSubsectorButton()
-    {
+    fun onSubsectorButton() {
         if (model.selectedSector != null && model.selectedSubsector != null) {
             view.launchShowNotesActivity(model.selectedSector, model.selectedSubsector)
         }

@@ -9,13 +9,10 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
 import android.icu.text.SimpleDateFormat
-import android.icu.util.Calendar
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
 import android.provider.MediaStore
-import android.text.method.ScrollingMovementMethod
 import android.view.Gravity
 import android.view.View
 import android.widget.*
@@ -35,18 +32,13 @@ import es.uji.al375496.cultivemanagement.view.ShowNotesView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
-import java.lang.Exception
-import java.util.*
 
 
 @Suppress("DEPRECATION")
 @SuppressLint("InflateParams", "SimpleDateFormat", "CutPasteId")
 class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
-
-
     private lateinit var renameButton: Button
     private lateinit var completeButton: Button
     private lateinit var addButton: Button
@@ -87,32 +79,24 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
         completeRecyclerView.layoutManager = LinearLayoutManager(this)
 
         val model =
-            if (savedInstanceState != null) savedInstanceState.getParcelable<ShowNotesModel>(MODEL)!!
+            if (savedInstanceState != null) savedInstanceState.getParcelable(MODEL)!!
             else ShowNotesModel()
         presenter = ShowNotesPresenter(this, model, this)
 
         val sector: Sector? = intent.getParcelableExtra(SECTOR)
         val subsector: Subsector? = intent.getParcelableExtra(SUBSECTOR)
-        if (sector != null)
-        {
+        if (sector != null) {
             if (subsector != null)
                 presenter.setup(sector, subsector)
             else
                 presenter.setup(sector)
         }
         else
-            presenter.setup();
-
+            presenter.setup()
 
         storedDialog = savedInstanceState?.getParcelable(DIALOG)
     }
 
-    override fun onSaveInstanceState(outState: Bundle)
-    {
-        outState.putParcelable(MODEL, presenter.model)
-        outState.putParcelable(DIALOG, storedDialog)
-        super.onSaveInstanceState(outState)
-    }
 
     override fun onResume() {
         super.onResume()
@@ -151,13 +135,11 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
                     pendingRecyclerView.visibility = View.GONE
                     completeRecyclerView.visibility = View.VISIBLE
                 }
-
                 loadingTextView.visibility = View.INVISIBLE
                 loadingProgressBar.visibility = View.INVISIBLE
             }
-
-
         }
+
     override var canRename: Boolean
         get() = shouldShowRenameButton
         set(value) {
@@ -234,21 +216,38 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
                 bitmap = if (Build.VERSION.SDK_INT < 28) MediaStore.Images.Media.getBitmap(contentResolver, currentPhotoPath)
                     else ImageDecoder.decodeBitmap(ImageDecoder.createSource(this.contentResolver, currentPhotoPath!!))
             } catch (e: FileNotFoundException) {
-                e.printStackTrace();
+                e.printStackTrace()
             } catch (e: IOException) {
-                e.printStackTrace();
+                e.printStackTrace()
             }
             storedDialog!!.image = bitmap
         }
     }
+    override fun onSwitchRecyclerView(view: View) {
+        presenter.switchRecyclerView()
+    }
+
+    override fun populateRecycleViews(pendingNotes: List<Note>, completeNotes: List<Note>) {
+        pendingList.clear()
+        pendingList.addAll(pendingNotes)
+        pendingRecyclerView.adapter?.notifyDataSetChanged()
+
+        completeList.clear()
+        completeList.addAll(completeNotes)
+        completeRecyclerView.adapter?.notifyDataSetChanged()
+    }
+
+    override fun setTitle(string: String) {
+        title = string
+    }
 
 
-    @SuppressLint("CutPasteId")
-    override fun restoreDialog(info: ParcelableDialogInfo){
+
+    private fun restoreDialog(info: ParcelableDialogInfo){
         val ctx: Context = this
         val builder = AlertDialog.Builder(ctx).apply {
             setTitle(getString(R.string.add_new_note))
-            val layout: View = layoutInflater.inflate(R.layout.dialog_add, null);
+            val layout: View = layoutInflater.inflate(R.layout.dialog_add, null)
             setView(layout)
             setPositiveButton(getString(R.string.ok)) { dialog, _ -> dialog.dismiss()
                 presenter.addNote(
@@ -316,25 +315,6 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
         }
     }
 
-
-    override fun onSwitchRecyclerView(view: View) {
-        presenter.switchRecyclerView()
-    }
-
-    override fun populateRecycleViews(pendingNotes: List<Note>, completeNotes: List<Note>) {
-        pendingList.clear()
-        pendingList.addAll(pendingNotes)
-        pendingRecyclerView.adapter?.notifyDataSetChanged()
-
-        completeList.clear()
-        completeList.addAll(completeNotes)
-        completeRecyclerView.adapter?.notifyDataSetChanged()
-    }
-
-    override fun setTitle(string: String) {
-        title = string
-    }
-
     private fun onElementClick(note: Note){
         val ctx : Context = this
         GlobalScope.launch(Dispatchers.Main) {
@@ -364,13 +344,9 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
             val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
             dialog.findViewById<TextView>(R.id.fullNoteTextView)?.text = note.text
 
-            dialog.findViewById<TextView>(R.id.dialogTakenOnTimestamp)?.text = simpleDateFormat.format(
-                note.creation_timestamp
-            )
+            dialog.findViewById<TextView>(R.id.dialogTakenOnTimestamp)?.text = simpleDateFormat.format(note.creation_timestamp)
             if (note.reminder_timestamp != null)
-                dialog.findViewById<TextView>(R.id.dialogReminderTimestamp)?.text = simpleDateFormat.format(
-                    note.creation_timestamp
-                )
+                dialog.findViewById<TextView>(R.id.dialogReminderTimestamp)?.text = simpleDateFormat.format( note.creation_timestamp)
             else
             {
                 dialog.findViewById<TextView>(R.id.dialogReminderTimestamp)?.visibility = View.GONE
@@ -379,6 +355,7 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
             if (note.imgUri != null){
                 var bitmap: Bitmap? = null
                 try {
+                    @Suppress("BlockingMethodInNonBlockingContext")
                     bitmap = if (Build.VERSION.SDK_INT < 28) MediaStore.Images.Media.getBitmap(contentResolver, Uri.parse(note.imgUri))
                     else ImageDecoder.decodeBitmap(ImageDecoder.createSource(ctx.contentResolver, Uri.parse(note.imgUri)))
                 } catch (e: Exception) {
@@ -390,6 +367,13 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
                 }
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle)
+    {
+        outState.putParcelable(MODEL, presenter.model)
+        outState.putParcelable(DIALOG, storedDialog)
+        super.onSaveInstanceState(outState)
     }
 }
 
