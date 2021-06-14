@@ -14,7 +14,7 @@ interface MyDAO {
     fun insertSubsectors(subsectors: List<Subsector>)
 
     @Insert
-    fun insertNote(note: Note)
+    fun insertNote(note: Note) : Long
 
     @Query
     ("SELECT * FROM sectors ORDER BY id")

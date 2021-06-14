@@ -95,7 +95,7 @@
         android:textSize="12sp"
         android:textStyle="bold|italic"
         app:layout_constraintBottom_toBottomOf="@+id/reminderTextView"
-        app:layout_constraintEnd_toEndOf="@+id/dialogTakenOnTimestamp"
+        app:layout_constraintStart_toStartOf="@+id/dialogTakenOnTimestamp"
         app:layout_constraintTop_toTopOf="@+id/reminderTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

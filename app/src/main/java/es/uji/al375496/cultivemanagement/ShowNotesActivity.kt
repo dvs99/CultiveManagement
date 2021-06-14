@@ -2,12 +2,14 @@ package es.uji.al375496.cultivemanagement
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.*
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder
+import android.graphics.drawable.BitmapDrawable
 import android.icu.text.SimpleDateFormat
 import android.net.Uri
 import android.os.Build
@@ -34,6 +36,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.util.*
 
 
 @Suppress("DEPRECATION")
@@ -56,8 +59,12 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
 
     private lateinit var presenter: ShowNotesPresenter
     private var storedDialog: ParcelableDialogInfo? = null
+    private var openDialog: Dialog? = null
 
     private var currentPhotoPath: Uri? = null
+    private var currentReminder: Date? = null
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,6 +102,20 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
             presenter.setup()
 
         storedDialog = savedInstanceState?.getParcelable(DIALOG)
+        currentPhotoPath = savedInstanceState?.getParcelable(PHOTO_PATH)
+
+        currentReminder = savedInstanceState?.getLong(REMINDER)?.let { Date(it) }
+        if (currentReminder != null && currentReminder!! == Date(0L))
+            currentReminder = null
+        storedDialog?.reminder = currentReminder
+
+        // Register the notification channel with the system
+        val channel = NotificationChannel(REMINDERS, getString(R.string.reminders), NotificationManager.IMPORTANCE_DEFAULT).apply {
+            description = getString(R.string.reminders_description)
+        }
+        val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
 
@@ -221,6 +242,8 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
                 e.printStackTrace()
             }
             storedDialog!!.image = bitmap
+            if (currentReminder != null)
+                storedDialog!!.reminder = currentReminder
         }
     }
     override fun onSwitchRecyclerView(view: View) {
@@ -241,30 +264,36 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
         title = string
     }
 
-
-
     private fun restoreDialog(info: ParcelableDialogInfo){
         val ctx: Context = this
         val builder = AlertDialog.Builder(ctx).apply {
             setTitle(getString(R.string.add_new_note))
             val layout: View = layoutInflater.inflate(R.layout.dialog_add, null)
             setView(layout)
-            setPositiveButton(getString(R.string.ok)) { dialog, _ -> dialog.dismiss()
+            setPositiveButton(getString(R.string.ok)) { dialog, _ ->
+                dialog.dismiss()
+                openDialog = null
                 presenter.addNote(
                     layout.findViewById<EditText>(R.id.addTitleEditText).text.toString(),
                     layout.findViewById<EditText>(
                         R.id.addNoteEditTextMultiLine
                     ).text.toString(),
-                    currentPhotoPath.toString()
+                    currentPhotoPath.toString(), currentReminder
                 )
                 currentPhotoPath = null
+                currentReminder = null
             }
-            setNegativeButton(getString(R.string.cancel)) { dialog, _ -> dialog.dismiss()
+            setNegativeButton(getString(R.string.cancel)) { dialog, _ ->
+                dialog.dismiss()
+                openDialog = null
+                currentPhotoPath = null
+                currentReminder = null
             }
         }
 
         val dialog = builder.create()
         dialog.show()
+        openDialog = dialog
 
         dialog.findViewById<TextView>(R.id.addTitleEditText)?.text = info.title
         dialog.findViewById<TextView>(R.id.addNoteEditTextMultiLine)?.text = info.text
@@ -273,26 +302,56 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
             dialog.findViewById<ImageView>(R.id.previewImageView)?.visibility = View.VISIBLE
             dialog.findViewById<ImageView>(R.id.previewImageView)?.setImageBitmap(info.image)
         }
+        if (info.reminder != null){
+            currentReminder = info.reminder
+            dialog.findViewById<TextView>(R.id.addReminderTextView)?.visibility = View.VISIBLE
+            val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+            dialog.findViewById<TextView>(R.id.addReminderTextView)?.text = simpleDateFormat.format(currentReminder)
+            dialog.findViewById<Button>(R.id.addReminderButton)?.visibility = View.INVISIBLE
+        }
         val permissionCheckA = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
         val permissionCheckB = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
         if (permissionCheckA != PackageManager.PERMISSION_GRANTED || (permissionCheckB != PackageManager.PERMISSION_GRANTED && Build.VERSION.SDK_INT < 29))
             dialog.findViewById<Button>(R.id.pictureButton)?.isEnabled = false
 
+        //set the add reminder button
+        dialog.findViewById<Button>(R.id.addReminderButton)?.setOnClickListener {
+            val currentDateTime = Calendar.getInstance()
+            val startYear = currentDateTime.get(Calendar.YEAR)
+            val startMonth = currentDateTime.get(Calendar.MONTH)
+            val startDay = currentDateTime.get(Calendar.DAY_OF_MONTH)
+            val startHour = currentDateTime.get(Calendar.HOUR_OF_DAY)
+            val startMinute = currentDateTime.get(Calendar.MINUTE)
 
-        dialog.findViewById<TextView>(R.id.pictureButton)?.setOnClickListener {
+            DatePickerDialog(this, { _, year, month, day ->
+                TimePickerDialog(this, { _, hour, minute ->
+                    val pickedDateTime = Calendar.getInstance()
+                    pickedDateTime.set(year, month, day, hour, minute, 0)
+                    currentReminder = pickedDateTime.time
+                    dialog.findViewById<TextView>(R.id.addReminderTextView)?.visibility = View.VISIBLE
+                    val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
+                    dialog.findViewById<TextView>(R.id.addReminderTextView)?.text = simpleDateFormat.format(currentReminder)
+                    dialog.findViewById<Button>(R.id.addReminderButton)?.visibility = View.INVISIBLE
+                }, startHour, startMinute, false).show()
+            }, startYear, startMonth, startDay).show()
+        }
+
+        //set the add picture button
+        dialog.findViewById<Button>(R.id.pictureButton)?.setOnClickListener {
             val permissionCam = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
             val permissionWrite = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
             if (permissionCam == PackageManager.PERMISSION_GRANTED && (permissionWrite == PackageManager.PERMISSION_GRANTED || Build.VERSION.SDK_INT >= 29)) {
                 storedDialog  = ParcelableDialogInfo(
                     dialog.findViewById<EditText>(R.id.addTitleEditText)!!.text.toString(),
-                    dialog.findViewById<EditText>(
-                        R.id.addNoteEditTextMultiLine
-                    )!!.text.toString(),
+                    dialog.findViewById<EditText>(R.id.addNoteEditTextMultiLine)!!.text.toString(),
                     null,
-                    null
+                    currentReminder
                 )
 
                 dialog.dismiss()
+                openDialog = null
+                currentPhotoPath = null
+                currentReminder = null
                 Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
                     // Ensure that there's a camera activity to handle the intent
                     takePictureIntent.resolveActivity(packageManager)?.also {
@@ -312,6 +371,19 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
                     }
                 }
             }
+        }
+    }
+
+    private fun storeOpenDialog()
+    {
+        if (openDialog!= null)
+        {
+            storedDialog = ParcelableDialogInfo(
+                    openDialog!!.findViewById<EditText>(R.id.addTitleEditText)!!.text.toString(),
+                    openDialog!!.findViewById<EditText>(R.id.addNoteEditTextMultiLine)!!.text.toString(),
+                    (openDialog!!.findViewById<ImageView>(R.id.previewImageView)!!.drawable as BitmapDrawable?)?.bitmap,
+                null
+            )
         }
     }
 
@@ -341,12 +413,12 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
             val dialog = builder.create()
             dialog.show()
 
-            val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+            val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm")
             dialog.findViewById<TextView>(R.id.fullNoteTextView)?.text = note.text
 
             dialog.findViewById<TextView>(R.id.dialogTakenOnTimestamp)?.text = simpleDateFormat.format(note.creation_timestamp)
             if (note.reminder_timestamp != null)
-                dialog.findViewById<TextView>(R.id.dialogReminderTimestamp)?.text = simpleDateFormat.format( note.creation_timestamp)
+                dialog.findViewById<TextView>(R.id.dialogReminderTimestamp)?.text = simpleDateFormat.format( note.reminder_timestamp)
             else
             {
                 dialog.findViewById<TextView>(R.id.dialogReminderTimestamp)?.visibility = View.GONE
@@ -371,9 +443,20 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
 
     override fun onSaveInstanceState(outState: Bundle)
     {
+        storeOpenDialog()
+        openDialog?.dismiss()
+
         outState.putParcelable(MODEL, presenter.model)
         outState.putParcelable(DIALOG, storedDialog)
+        outState.putParcelable(PHOTO_PATH, currentPhotoPath)
+        currentReminder?.let { outState.putLong(REMINDER, it.time) }
         super.onSaveInstanceState(outState)
+    }
+
+    override fun onPause() {
+        storeOpenDialog()
+        openDialog?.dismiss()
+        super.onPause()
     }
 }
 

@@ -40,12 +40,13 @@ class DatabaseAccess private constructor(context: Context)
         }
     }
 
-    fun insertNote(callback: () -> Unit, note: Note){
+    fun insertNote(callback: (Long) -> Unit, note: Note){
         GlobalScope.launch(Dispatchers.Main) {
+            var id: Long
             withContext(Dispatchers.IO) {
-                dao.insertNote(note)
+                id = dao.insertNote(note)
             }
-            callback()
+            callback(id)
         }
     }
 

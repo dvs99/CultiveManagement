@@ -1,7 +1,6 @@
 package es.uji.al375496.cultivemanagement.view
 
 import android.view.View
-import es.uji.al375496.cultivemanagement.model.MainModel
 import es.uji.al375496.cultivemanagement.model.database.entities.Note
 
 interface ShowNotesView {

@@ -29,4 +29,7 @@
     <string name="take_picture">Take picture</string>
     <string name="preview">preview</string>
     <string name="note_image">Note image</string>
+    <string name="reminders">Reminders</string>
+    <string name="reminders_description">Notifies the note reminders</string>
+    <string name="set_reminder">Set reminder</string>
 </resources>

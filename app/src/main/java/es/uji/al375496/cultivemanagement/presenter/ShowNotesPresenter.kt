@@ -1,12 +1,12 @@
 package es.uji.al375496.cultivemanagement.presenter
 
 import android.content.Context
-import java.util.Calendar
 import es.uji.al375496.cultivemanagement.model.ShowNotesModel
 import es.uji.al375496.cultivemanagement.model.database.entities.Note
 import es.uji.al375496.cultivemanagement.model.database.entities.Sector
 import es.uji.al375496.cultivemanagement.model.database.entities.Subsector
 import es.uji.al375496.cultivemanagement.view.ShowNotesView
+import java.util.*
 
 class ShowNotesPresenter (private val view: ShowNotesView, val model: ShowNotesModel, private val context: Context)
 {
@@ -86,11 +86,11 @@ class ShowNotesPresenter (private val view: ShowNotesView, val model: ShowNotesM
         model.showPending = !model.showPending
     }
 
-    fun addNote(title: String, text: String, image: String?) {
+    fun addNote(title: String, text: String, image: String?, reminder : Date?) {
         view.loading = true
         if (model.sector != null && model.subsector != null)
         view.loading = true
-        model.addNote(Note(model.subsector!!.id, model.sector!!.id, title, text, false, Calendar.getInstance().time,null, image), context){
+        model.addNote(Note(model.subsector!!.id, model.sector!!.id, title, text, false, Calendar.getInstance().time, reminder, image), context){
             model.getNotes(context, ::lateSetup)
         }
     }

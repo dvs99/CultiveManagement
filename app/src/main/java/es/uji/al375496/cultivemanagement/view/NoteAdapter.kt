@@ -1,5 +1,7 @@
 package es.uji.al375496.cultivemanagement.view
 
+import android.annotation.SuppressLint
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -12,9 +14,15 @@ class NoteAdapter(private val notes: MutableList<Note>, val onclick : (Note) -> 
         return NoteViewHolder(view)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onBindViewHolder(holder: NoteViewHolder, position: Int) {
         with(notes[position]) {
-            holder.title.text = title
+            if (title != "")
+                holder.title.text = title
+            else{
+                holder.title.text = "untitled"
+                holder.title.setTypeface(holder.title.typeface, Typeface.BOLD_ITALIC)
+            }
             holder.body.text = text
             holder.view.setOnClickListener {
                 onclick(this)
