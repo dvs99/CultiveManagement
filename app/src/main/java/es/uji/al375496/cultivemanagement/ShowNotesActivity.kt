@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.lang.Exception
 import java.util.*
 
 
@@ -273,14 +274,16 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
             dialog.findViewById<ImageView>(R.id.previewImageView)?.visibility = View.VISIBLE
             dialog.findViewById<ImageView>(R.id.previewImageView)?.setImageBitmap(info.image)
         }
-        val permissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-        if (permissionCheck != PackageManager.PERMISSION_GRANTED)
+        val permissionCheckA = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+        val permissionCheckB = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        if (permissionCheckA != PackageManager.PERMISSION_GRANTED || (permissionCheckB != PackageManager.PERMISSION_GRANTED && Build.VERSION.SDK_INT < 29))
             dialog.findViewById<Button>(R.id.pictureButton)?.isEnabled = false
 
 
         dialog.findViewById<TextView>(R.id.pictureButton)?.setOnClickListener {
-            val permission = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-            if (permission == PackageManager.PERMISSION_GRANTED) {
+            val permissionCam = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+            val permissionWrite = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            if (permissionCam == PackageManager.PERMISSION_GRANTED && (permissionWrite == PackageManager.PERMISSION_GRANTED || Build.VERSION.SDK_INT >= 29)) {
                 storedDialog  = ParcelableDialogInfo(
                     dialog.findViewById<EditText>(R.id.addTitleEditText)!!.text.toString(),
                     dialog.findViewById<EditText>(
@@ -309,7 +312,6 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
 
                     }
                 }
-
             }
         }
     }
@@ -379,10 +381,8 @@ class ShowNotesActivity : AppCompatActivity(), ShowNotesView {
                 try {
                     bitmap = if (Build.VERSION.SDK_INT < 28) MediaStore.Images.Media.getBitmap(contentResolver, Uri.parse(note.imgUri))
                     else ImageDecoder.decodeBitmap(ImageDecoder.createSource(ctx.contentResolver, Uri.parse(note.imgUri)))
-                } catch (e: FileNotFoundException) {
-                    e.printStackTrace();
-                } catch (e: IOException) {
-                    e.printStackTrace();
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
                 if (bitmap != null){
                     dialog.findViewById<ImageView>(R.id.noteImageView)?.visibility = View.VISIBLE

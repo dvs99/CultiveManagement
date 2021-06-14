@@ -2,6 +2,7 @@ package es.uji.al375496.cultivemanagement
 
 import android.Manifest
 import android.content.Intent
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -53,7 +54,10 @@ class MainActivity : AppCompatActivity(), MainView {
         sectorsEditText.addTextChangedListener(textChangedWatcher)
         subsectorsEditText.addTextChangedListener(textChangedWatcher)
 
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.CAMERA), 0)
+        val permissions = mutableListOf(Manifest.permission.CAMERA)
+        if(Build.VERSION.SDK_INT < 29)
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        ActivityCompat.requestPermissions(this, permissions.toTypedArray(), 0)
     }
 
     override fun onButton(view: View) {
