@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">Cultive Management</string>
+    <string name="amount_of_sectors">Amount of sectors:</string>
+    <string name="amount_of_subsectors_per_sector">Amount of subsectors per sector:</string>
+    <string name="set_up">Set up</string>
+    <string name="loading">Loading…</string>
+    <string name="go">GO</string>
+    <string name="see_all">See All</string>
+    <string name="sector">Sector</string>
+    <string name="subsector">Subsector</string>
+    <string name="rename">Rename</string>
+    <string name="add_new">Add new</string>
+    <string name="show_completed">Show completed</string>
+    <string name="show_pending">Show pending</string>
+    <string name="enter_name">Enter new name</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="taken_on">Taken on:</string>
+    <string name="reminder">Reminder:</string>
+    <string name="back">Back</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="set_complete">Set as completed</string>
+    <string name="note">Note:</string>
+    <string name="title">Title:</string>
+    <string name="title_">Title</string>
+    <string name="note_">Note</string>
+    <string name="add_new_note">Add new note</string>
+    <string name="take_picture">Take picture</string>
+    <string name="preview">preview</string>
+    <string name="note_image">Note image</string>
+</resources>

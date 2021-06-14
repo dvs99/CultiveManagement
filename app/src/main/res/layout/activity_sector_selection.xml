@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SectorSelectionActivity">
+
+    <TextView
+        android:id="@+id/subsectorTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="42dp"
+        android:text="@string/subsector"
+        android:textSize="18sp"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sectorTextView" />
+
+    <AutoCompleteTextView
+        android:imeOptions="flagNoExtractUi"
+        android:id="@+id/subsectorAutoCompleteTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginEnd="12dp"
+        android:completionThreshold="0"
+        android:hint="@string/subsector"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:visibility="gone"
+        app:layout_constraintBaseline_toBaselineOf="@+id/subsectorTextView"
+        app:layout_constraintEnd_toStartOf="@+id/subsectorGoButton"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/subsectorGoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:enabled="false"
+        android:onClick="onGoButton"
+        android:text="@string/go"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/subsectorAutoCompleteTextView"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/allGoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:onClick="onGoButton"
+        android:text="@string/see_all"
+        android:visibility="invisible"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/subsectorAutoCompleteTextView" />
+
+    <TextView
+        android:id="@+id/sectorTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="30dp"
+        android:text="@string/sector"
+        android:textSize="18sp"
+        android:visibility="invisible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <AutoCompleteTextView
+        android:imeOptions="flagNoExtractUi"
+        android:id="@+id/sectorAutoCompleteTextView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100dp"
+        android:layout_marginEnd="12dp"
+        android:completionThreshold="0"
+        android:hint="@string/sector"
+        android:maxLines="1"
+        android:singleLine="true"
+        android:visibility="invisible"
+        app:layout_constraintBaseline_toBaselineOf="@+id/sectorTextView"
+        app:layout_constraintEnd_toStartOf="@+id/sectorGoButton"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/sectorGoButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:enabled="false"
+        android:onClick="onGoButton"
+        android:text="@string/go"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="@+id/sectorAutoCompleteTextView"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ProgressBar
+        android:id="@+id/loadingProgressBar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="250dp"
+        android:scaleX="2"
+        android:scaleY="2"
+        app:layout_constraintBottom_toTopOf="@+id/loadingTextView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/loadingTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="220dp"
+        android:text="@string/loading"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/loadingProgressBar"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="@+id/loadingProgressBar"
+        app:layout_constraintTop_toBottomOf="@+id/loadingProgressBar" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
